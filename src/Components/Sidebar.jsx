@@ -10,7 +10,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloudOutlinedIcon from '@mui/icons-material/CloudOutlined';
 import { Modal } from '@mui/material';
-import { db, storage, serverTimestamp } from "../firebase";
+import { db, storage, serverTimestamp, auth } from "../firebase"; // Ensure auth is imported
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 
@@ -19,7 +19,9 @@ function Sidebar() {
     const [uploading, setUploading] = useState(false);
     const [file, setFile] = useState(null);
     const [usedStorage, setUsedStorage] = useState(0);
-    const totalStorage = 100 * 1024 * 1024 ; // 100 MB in bytes
+    const totalStorage = 100 * 1024 * 1024; // 100 MB in bytes
+
+    const user = auth.currentUser;
 
     useEffect(() => {
         async function fetchFiles() {
@@ -41,8 +43,8 @@ function Sidebar() {
 
     const handleUpload = async (e) => {
         e.preventDefault();
-        if (!file) {
-            alert("Please select a file first.");
+        if (!file || !user) {
+            alert("Please select a file and make sure you're logged in.");
             return;
         }
 
@@ -61,7 +63,8 @@ function Sidebar() {
                 timestamp: serverTimestamp(),
                 filename: file.name,
                 fileURL: url,
-                size: snapshot.metadata.size
+                size: snapshot.metadata.size,
+                uid: user.uid // Store the user's UID with the file
             });
 
             // Update used storage
