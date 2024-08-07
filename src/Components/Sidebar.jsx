@@ -124,7 +124,7 @@ function Sidebar() {
                     <div className='h-2 rounded-3xl bg-gray-300 w-full'>
                         <div className='bg-blue-600 h-full rounded-3xl' style={{ width: `${usedPercentage}%` }}></div>
                     </div>
-                    <span>{(usedStorage / 1024 / 1024).toFixed(2)} GB of 100 MB</span>
+                    <span>{(usedStorage / 1024 / 1024).toFixed(2)} MB of 100 MB</span>
                 </div>
             </div>
         </>
