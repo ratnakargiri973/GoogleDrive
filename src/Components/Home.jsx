@@ -83,11 +83,11 @@ function Home() {
     return (
         <>
             <Header />
-            <div className='flex'>
-                <Sidebar />
-                <div className='p-8 w-full flex flex-col justify-start items-start'>
-                    <div className='flex justify-between items-center w-full'>
-                        <h1 className='font-semibold text-3xl'>Home</h1>
+            <div className='flex flex-col lg:flex-row'>
+                <Sidebar className='lg:w-1/5' />
+                <div className='flex-1 p-4 lg:p-8'>
+                    <div className='flex flex-col lg:flex-row justify-between items-center'>
+                        <h1 className='font-semibold text-3xl mb-4 lg:mb-0'>Home</h1>
                         <div className='flex gap-4 mb-4'>
                             <button onClick={() => setViewMode('list')} className='p-2'>
                                 <ViewListIcon className={viewMode === 'list' ? 'text-blue-500' : ''} />
@@ -101,20 +101,20 @@ function Home() {
                     {filteredFiles.length > 0 ? (
                         viewMode === 'list' ? (
                             <>
-                                <div className='flex justify-between items-center pt-16 w-full mb-2'>
+                                <div className='flex flex-col lg:flex-row lg:justify-between items-center pt-16 w-full mb-2'>
                                     <p className='pl-8'><b>Name</b></p>
                                     <p className='pl-8'><b>Last Modified</b></p>
                                     <p className='pl-24'><b>File Size</b></p>
                                     <p><b>Actions</b></p>
                                 </div>
                                 {filteredFiles.map(file => (
-                                    <div key={file.id} className='flex justify-between items-center w-full py-2 bg-green-600 p-2 rounded-3xl mb-2 hover:bg-teal-300'>
-                                        <a href={file.data.fileURL} target='_blank' rel='noopener noreferrer'>
-                                            <p className='flex items-center gap-2'><InsertDriveFileIcon />{file.data.filename}</p>
+                                    <div key={file.id} className='flex flex-col lg:flex-row justify-between items-center w-full py-2 bg-green-600 p-2 rounded-3xl mb-2 hover:bg-teal-300'>
+                                        <a href={file.data.fileURL} target='_blank' rel='noopener noreferrer' className='flex items-center gap-2'>
+                                            <InsertDriveFileIcon />{file.data.filename}
                                         </a>
                                         <p>{new Date(file.data.timestamp?.seconds * 1000).toUTCString()}</p>
                                         <p>{changeBytes(file.data.size)}</p>
-                                        <div>
+                                        <div className='flex gap-2'>
                                             <button onClick={() => handleCopy(file.data.fileURL)}><ContentCopyIcon /></button>
                                             <button onClick={() => handleDelete(file.id, file.data.fileURL)}>
                                                 <DeleteIcon className="text-red-600 cursor-pointer" />

@@ -6,7 +6,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AppsIcon from '@mui/icons-material/Apps';
 import AppGuide from './AppGuide';
-import { Modal, Box, Menu, MenuItem, Avatar } from '@mui/material';
+import { Modal, Box, Menu, MenuItem, Avatar, IconButton } from '@mui/material';
 import { authContext } from './Context';
 
 function Header() {
@@ -23,6 +23,7 @@ function Header() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [anchorFileMenu, setAnchorFileMenu] = useState(null);
   const [anchorProfileMenu, setAnchorProfileMenu] = useState(null);
+  const [anchorMobileMenu, setAnchorMobileMenu] = useState(null);
 
   useEffect(() => {
     document.body.className = theme;
@@ -40,6 +41,14 @@ function Header() {
   const handleThemeChange = (newTheme) => {
     setTheme(newTheme);
     setAnchorEl(null);
+  };
+
+  const handleMobileMenuOpen = (event) => {
+    setAnchorMobileMenu(event.currentTarget);
+  };
+
+  const handleMobileMenuClose = () => {
+    setAnchorMobileMenu(null);
   };
 
   return (
@@ -65,54 +74,60 @@ function Header() {
       <div className='w-full h-16 flex justify-between items-center bg-slate-50'>
         <div className='logo flex justify-start gap-5 items-center pl-6'>
           <img src={logo} alt='logo' className='w-10' />
-          <h1 className='text-3xl text-gray-600'>Drive</h1>
+          <h1 className='text-3xl text-gray-600 hidden md:block'>Drive</h1>
         </div>
 
-        <div className='flex justify-start gap-5 items-center pl-6 bg-slate-300 p-2 rounded text-gray-500'>
-          <SearchIcon  />
-          
-          <input
-            type="text"
-            placeholder='Search in disk'
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className='w-96 bg-slate-300 border-0 outline-0'
-          />
-          <FormatAlignCenterIcon onClick={(event) => setAnchorFileMenu(event.currentTarget)}/>
-          <Menu
-            id="files-sort"
-            anchorEl={anchorFileMenu}
-            open={Boolean(anchorFileMenu)}
-            onClose={() => setAnchorFileMenu(null)}
+        <div className='flex items-center gap-5 px-6 md:px-0'>
+          {/* Mobile Menu Button */}
+          <IconButton 
+            className='md:hidden'
+            onClick={handleMobileMenuOpen}
           >
-            <MenuItem onClick={sortAscFilesByName}>Name Ascending</MenuItem>
-            <MenuItem onClick={sortDescFilesByName}>Name Descending</MenuItem>
-            <MenuItem onClick={sortAscFilesByDate}>Date Ascending</MenuItem>
-            <MenuItem onClick={sortDescFilesByDate}>Date Ascending</MenuItem>
+            <AppsIcon />
+          </IconButton>
 
-          </Menu>
-        </div>
+          {/* Search and Sort for Desktop */}
+          <div className='hidden md:flex items-center gap-5 bg-slate-300 p-2 rounded text-gray-500'>
+            <SearchIcon />
+            <input
+              type="text"
+              placeholder='Search in disk'
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className='w-96 bg-slate-300 border-0 outline-0'
+            />
+            <FormatAlignCenterIcon onClick={(event) => setAnchorFileMenu(event.currentTarget)} />
+            <Menu
+              id="files-sort"
+              anchorEl={anchorFileMenu}
+              open={Boolean(anchorFileMenu)}
+              onClose={() => setAnchorFileMenu(null)}
+            >
+              <MenuItem onClick={sortAscFilesByName}>Name Ascending</MenuItem>
+              <MenuItem onClick={sortDescFilesByName}>Name Descending</MenuItem>
+              <MenuItem onClick={sortAscFilesByDate}>Date Ascending</MenuItem>
+              <MenuItem onClick={sortDescFilesByDate}>Date Descending</MenuItem>
+            </Menu>
+          </div>
 
-        <div className='flex justify-start gap-5 items-center pr-6 text-gray-600'>
-          <HelpOutlineIcon onClick={handleHelpClick} />
-          <SettingsOutlinedIcon
-            onClick={(event) => setAnchorEl(event.currentTarget)}
-            aria-controls={Boolean(anchorEl) ? 'theme-menu' : undefined}
-            aria-haspopup="true"
-          />
-          <Menu
-            id="theme-menu"
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={() => setAnchorEl(null)}
-          >
-            <MenuItem onClick={() => handleThemeChange('light-mode')}>Light Mode</MenuItem>
-            <MenuItem onClick={() => handleThemeChange('dark-mode')}>Dark Mode</MenuItem>
-            <MenuItem onClick={() => handleThemeChange('system')}>System Default</MenuItem>
-          </Menu>
-          <AppsIcon />
-
-          <div>
+          {/* Theme and Profile for Desktop */}
+          <div className='hidden md:flex items-center gap-5 text-gray-600'>
+            <HelpOutlineIcon onClick={handleHelpClick} />
+            <SettingsOutlinedIcon
+              onClick={(event) => setAnchorEl(event.currentTarget)}
+              aria-controls={Boolean(anchorEl) ? 'theme-menu' : undefined}
+              aria-haspopup="true"
+            />
+            <Menu
+              id="theme-menu"
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={() => setAnchorEl(null)}
+            >
+              <MenuItem onClick={() => handleThemeChange('light-mode')}>Light Mode</MenuItem>
+              <MenuItem onClick={() => handleThemeChange('dark-mode')}>Dark Mode</MenuItem>
+              <MenuItem onClick={() => handleThemeChange('system')}>System Default</MenuItem>
+            </Menu>
             <Avatar 
               src={photoURL} 
               onClick={(event) => setAnchorProfileMenu(event.currentTarget)}
@@ -126,11 +141,24 @@ function Header() {
               onClose={() => setAnchorProfileMenu(null)}
             > 
               <MenuItem className='font-bold'>My Account</MenuItem>
-              <MenuItem onClick={handleLogout} ><p className='text-red-500'>Log Out</p></MenuItem>
+              <MenuItem onClick={handleLogout}><p className='text-red-500'>Log Out</p></MenuItem>
             </Menu>
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      <Menu
+        anchorEl={anchorMobileMenu}
+        open={Boolean(anchorMobileMenu)}
+        onClose={handleMobileMenuClose}
+        className='md:hidden'
+      >
+        <MenuItem onClick={handleHelpClick}>Help</MenuItem>
+        <MenuItem onClick={() => setAnchorEl(anchorMobileMenu)}>Change Theme</MenuItem>
+        <MenuItem onClick={() => setAnchorFileMenu(anchorMobileMenu)}>Sort Files</MenuItem>
+        <MenuItem onClick={handleLogout}>Log Out</MenuItem>
+      </Menu>
     </>
   );
 }

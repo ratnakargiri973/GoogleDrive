@@ -10,7 +10,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloudOutlinedIcon from '@mui/icons-material/CloudOutlined';
 import { Modal } from '@mui/material';
-import { db, storage, serverTimestamp, auth } from "../firebase"; // Ensure auth is imported
+import { db, storage, serverTimestamp, auth } from "../firebase";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 
@@ -85,11 +85,11 @@ function Sidebar() {
 
     return (
         <>
-            <Modal open={open} onClose={() => setOpen(false)} 
+            <Modal open={open} onClose={() => setOpen(false)}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div className='m-auto w-96 h-36 rounded bg-teal-500 p-4'>
+                <div className='m-auto w-80 sm:w-96 h-36 rounded bg-teal-500 p-4'>
                     <form onSubmit={handleUpload} className='flex justify-center items-center flex-col w-full h-full gap-4 text-white'>
-                        <h3 className='font-bold '>Select the file you want to upload</h3>
+                        <h3 className='font-bold text-lg'>Select the file you want to upload</h3>
                         <div>
                             {uploading ? <h3>Uploading...</h3> :
                                 (<div className='flex justify-center items-center flex-col w-full h-full gap-4'>
@@ -102,13 +102,13 @@ function Sidebar() {
                 </div>
             </Modal>
 
-            <div className='sidebarContainer flex flex-col justify-between p-8  w-1/5 gap-4 h-full mt-3.5'>
-                <button className='flex justify-center items-center gap-5 shadow-md p-2 rounded shadow-black w-2/4 border-0 outline-0 cursor-pointer' onClick={() => setOpen(true)}>
+            <div className='sidebarContainer flex flex-col justify-between p-4 sm:p-8 w-full sm:w-1/4 lg:w-1/5 gap-4 h-full mt-3.5'>
+                <button className='flex justify-center items-center gap-5 shadow-md p-2 rounded shadow-black w-full border-0 outline-0 cursor-pointer' onClick={() => setOpen(true)}>
                     <AddIcon />
-                    <span>New</span>
+                    <span className='hidden sm:block'>New</span>
                 </button>
-                <div>
-                    <ul className='flex flex-col justify-center items-start gap-2 pt-4'>
+                <div className='flex flex-col gap-4'>
+                    <ul className='flex flex-col gap-2'>
                         <li className='flex justify-center items-center gap-2 hover:bg-gray-200 cursor-pointer p-2 rounded'><HomeOutlinedIcon /> Home</li>
                         <li className='flex justify-center items-center gap-2 hover:bg-gray-200 cursor-pointer p-2 rounded'><DriveFolderUploadIcon />My Drive</li>
                         <li className='flex justify-center items-center gap-2 hover:bg-gray-200 cursor-pointer p-2 rounded'><ComputerIcon />Computers</li>
@@ -120,11 +120,11 @@ function Sidebar() {
                         <li className='flex justify-center items-center gap-2 hover:bg-gray-200 cursor-pointer p-2 rounded'><CloudOutlinedIcon />Storage</li>
                     </ul>
                 </div>
-                <div className='flex flex-col justify-center items-start gap-2'>
+                <div className='flex flex-col gap-2'>
                     <div className='h-2 rounded-3xl bg-gray-300 w-full'>
                         <div className='bg-blue-600 h-full rounded-3xl' style={{ width: `${usedPercentage}%` }}></div>
                     </div>
-                    <span>{(usedStorage / 1024 / 1024).toFixed(2)} MB of 100 MB</span>
+                    <span className='text-sm'>{(usedStorage / 1024 / 1024).toFixed(2)} MB of 100 MB</span>
                 </div>
             </div>
         </>
