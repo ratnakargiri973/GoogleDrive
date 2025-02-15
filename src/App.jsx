@@ -95,9 +95,13 @@ function App() {
       sortAscFilesByName, 
       sortDescFilesByName 
     }}>
-       <Header />
+      
       <div className='flex flex-col lg:flex-row'>
-      <Sidebar className='lg:w-1/5' />
+        <ProtectedRoute>
+        <Header />
+        <Sidebar className='lg:w-1/5' />
+        </ProtectedRoute>
+      
       <Routes>
         <Route path='/login' element={<Login />} />
         <Route path='/' element={
