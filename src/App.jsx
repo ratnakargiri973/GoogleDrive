@@ -95,10 +95,12 @@ function App() {
       sortAscFilesByName, 
       sortDescFilesByName 
     }}>
+      <ProtectedRoute>
+      <Header />
+      </ProtectedRoute>
       
       <div className='flex flex-col lg:flex-row'>
         <ProtectedRoute>
-        <Header />
         <Sidebar className='lg:w-1/5' />
         </ProtectedRoute>
       
