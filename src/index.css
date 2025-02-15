@@ -9,13 +9,13 @@
     font-family: Arial, Helvetica, sans-serif;
 }
 body.light-mode {
-    background-color: white;
+    --background: white;
     --text: black;
   }
   
   /* Dark theme */
   body.dark-mode {
-    background-color: black;
+    --background: black;
     --text: white;
   }
 body{

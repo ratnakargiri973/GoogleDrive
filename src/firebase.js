@@ -18,5 +18,6 @@ const storage = getStorage(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 setPersistence(auth, browserLocalPersistence);
+// console.log(auth, provider);
 
 export { app, db, storage, auth, provider, serverTimestamp, ref, uploadBytes, getDownloadURL ,onAuthStateChanged};

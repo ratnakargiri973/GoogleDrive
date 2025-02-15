@@ -14,7 +14,7 @@ import { authContext } from './Context';
 
 
 
-function Home() {
+function MyDrive() {
     const { files, setFiles, searchQuery } = useContext(authContext);
    
     const [viewMode, setViewMode] = useState('list');
@@ -82,7 +82,7 @@ function Home() {
         <>
             <div className="flex-1 p-6 lg:p-10">
             <header className="flex flex-col lg:flex-row justify-between items-center mb-6">
-                <h1 className="font-bold text-3xl text-gray-900">Home</h1>
+                <h1 className="font-bold text-3xl text-gray-900">My Drive</h1>
                 <div className="flex gap-4">
                     <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}>
                         <ViewListIcon />
@@ -145,7 +145,7 @@ function Home() {
             ) : (
                 <div className="flex flex-col justify-center items-center gap-4 w-full h-full text-center">
                     <img src={home} alt="home" className="w-80" />
-                    <h1 className="text-gray-900 text-2xl font-bold">Welcome to Drive, the home for all your files</h1>
+                    <h1 className="text-gray-900 text-2xl font-bold">Welcome to Drive, the my drive for all your files</h1>
                     <p className="text-gray-700">Use the “New” button to upload</p>
                 </div>
             )}
@@ -167,4 +167,4 @@ function Home() {
     );
 }
 
-export default Home;
+export default MyDrive;

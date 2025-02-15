@@ -7,6 +7,16 @@ import ProtectedRoute from './Components/ProtectedRoute';
 import { auth, provider, onAuthStateChanged } from './firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
 import Login from './Components/Login';
+import MyDrive from './Components/MyDrive';
+import Sidebar from './Components/Sidebar';
+import Header from './Components/Header';
+import Computers from './Components/Computers';
+import ShareWithMe from './Components/ShareWithMe';
+import Recent from './Components/Recent';
+import Starred from './Components/Starred';
+import Spam from './Components/Spam';
+import Trash from './Components/Trash';
+import Storage from './Components/Storage';
 
 function App() {
   const [files, setFiles] = useState([]);
@@ -34,10 +44,10 @@ function App() {
 
   function signIn() {
     signInWithPopup(auth, provider)
+   
       .then(({ user }) => {
         setUser(user);
-        setPhotoURL(user.photoURL);
-        navigate('/Home');
+        navigate('/');
       })
       .catch((err) => alert(err.message));
   }
@@ -46,7 +56,7 @@ function App() {
     signOut(auth)
       .then(() => {
         alert('You have been logged out.');
-        navigate('/');
+        navigate('/login');
       })
       .catch((err) => alert(err.message));
   }
@@ -85,14 +95,59 @@ function App() {
       sortAscFilesByName, 
       sortDescFilesByName 
     }}>
+       <Header />
+      <div className='flex flex-col lg:flex-row'>
+      <Sidebar className='lg:w-1/5' />
       <Routes>
-        <Route path='/' element={<Login />} />
-        <Route path='/Home' element={
+        <Route path='/login' element={<Login />} />
+        <Route path='/' element={
           <ProtectedRoute>
               <Home />
           </ProtectedRoute>
         } />
+        <Route path='/my-drive' element={
+          <ProtectedRoute>
+              <MyDrive />
+          </ProtectedRoute>
+        } />
+      <Route path='/computers' element={
+          <ProtectedRoute>
+              <Computers />
+          </ProtectedRoute>
+        } />
+        <Route path='/share-me' element={
+          <ProtectedRoute>
+              <ShareWithMe />
+          </ProtectedRoute>
+        } />
+        <Route path='/recent' element={
+          <ProtectedRoute>
+              <Recent />
+          </ProtectedRoute>
+        } />
+        <Route path='/starred' element={
+          <ProtectedRoute>
+              <Starred />
+          </ProtectedRoute>
+        } />
+        <Route path='/spam' element={
+          <ProtectedRoute>
+              <Spam />
+          </ProtectedRoute>
+        } />
+        <Route path='/trash' element={
+          <ProtectedRoute>
+              <Trash />
+          </ProtectedRoute>
+        } />
+        <Route path='/storage' element={
+          <ProtectedRoute>
+              <Storage />
+          </ProtectedRoute>
+        } />
+
       </Routes>
+      </div>
     </authContext.Provider>
   );
 }
