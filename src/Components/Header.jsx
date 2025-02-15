@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useContext } from 'react';
 import logo from '../assets/logo.png';
 import SearchIcon from '@mui/icons-material/Search';
@@ -160,3 +161,4 @@ function Header() {
 }
 
 export default Header;
+
