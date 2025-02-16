@@ -44,7 +44,6 @@ function App() {
 
   function signIn() {
     signInWithPopup(auth, provider)
-   
       .then(({ user }) => {
         setUser(user);
         navigate('/');
@@ -62,19 +61,27 @@ function App() {
   }
 
   function sortAscFilesByName() {
-    setFiles(files => [...files].sort((a, b) => a.data.filename.localeCompare(b.data.filename)));
+    setFiles(files => [...files].sort((a, b) => (a?.data?.filename || "").localeCompare(b?.data?.filename || "")));
   }
 
   function sortDescFilesByName() {
-    setFiles(files => [...files].sort((a, b) => b.data.filename.localeCompare(a.data.filename)));
+    setFiles(files => [...files].sort((a, b) => (b?.data?.filename || "").localeCompare(a?.data?.filename || "")));
   }
 
   function sortAscFilesByDate() {
-    setFiles(files => [...files].sort((a, b) => new Date(a.data.timestamp.seconds * 1000) - new Date(b.data.timestamp.seconds * 1000)));
+    setFiles(files => [...files].sort((a, b) => {
+      const dateA = a?.data?.timestamp?.seconds ? new Date(a.data.timestamp.seconds * 1000) : new Date(0);
+      const dateB = b?.data?.timestamp?.seconds ? new Date(b.data.timestamp.seconds * 1000) : new Date(0);
+      return dateA - dateB;
+    }));
   }
 
   function sortDescFilesByDate() {
-    setFiles(files => [...files].sort((a, b) => new Date(b.data.timestamp.seconds * 1000) - new Date(a.data.timestamp.seconds * 1000)));
+    setFiles(files => [...files].sort((a, b) => {
+      const dateA = a?.data?.timestamp?.seconds ? new Date(a.data.timestamp.seconds * 1000) : new Date(0);
+      const dateB = b?.data?.timestamp?.seconds ? new Date(b.data.timestamp.seconds * 1000) : new Date(0);
+      return dateB - dateA;
+    }));
   }
 
   if (loading) {
@@ -96,63 +103,26 @@ function App() {
       sortDescFilesByName 
     }}>
       <ProtectedRoute>
-      <Header />
+        <Header />
       </ProtectedRoute>
       
       <div className='flex flex-col lg:flex-row'>
         <ProtectedRoute>
-        <Sidebar className='lg:w-1/5' />
+          <Sidebar className='lg:w-1/5' />
         </ProtectedRoute>
       
-      <Routes>
-        <Route path='/login' element={<Login />} />
-        <Route path='/' element={
-          <ProtectedRoute>
-              <Home />
-          </ProtectedRoute>
-        } />
-        <Route path='/my-drive' element={
-          <ProtectedRoute>
-              <MyDrive />
-          </ProtectedRoute>
-        } />
-      <Route path='/computers' element={
-          <ProtectedRoute>
-              <Computers />
-          </ProtectedRoute>
-        } />
-        <Route path='/share-me' element={
-          <ProtectedRoute>
-              <ShareWithMe />
-          </ProtectedRoute>
-        } />
-        <Route path='/recent' element={
-          <ProtectedRoute>
-              <Recent />
-          </ProtectedRoute>
-        } />
-        <Route path='/starred' element={
-          <ProtectedRoute>
-              <Starred />
-          </ProtectedRoute>
-        } />
-        <Route path='/spam' element={
-          <ProtectedRoute>
-              <Spam />
-          </ProtectedRoute>
-        } />
-        <Route path='/trash' element={
-          <ProtectedRoute>
-              <Trash />
-          </ProtectedRoute>
-        } />
-        <Route path='/storage' element={
-          <ProtectedRoute>
-              <Storage />
-          </ProtectedRoute>
-        } />
-
-      </Routes>
+        <Routes>
+          <Route path='/login' element={<Login />} />
+          <Route path='/' element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path='/my-drive' element={<ProtectedRoute><MyDrive /></ProtectedRoute>} />
+          <Route path='/computers' element={<ProtectedRoute><Computers /></ProtectedRoute>} />
+          <Route path='/share-me' element={<ProtectedRoute><ShareWithMe /></ProtectedRoute>} />
+          <Route path='/recent' element={<ProtectedRoute><Recent /></ProtectedRoute>} />
+          <Route path='/starred' element={<ProtectedRoute><Starred /></ProtectedRoute>} />
+          <Route path='/spam' element={<ProtectedRoute><Spam /></ProtectedRoute>} />
+          <Route path='/trash' element={<ProtectedRoute><Trash /></ProtectedRoute>} />
+          <Route path='/storage' element={<ProtectedRoute><Storage /></ProtectedRoute>} />
+        </Routes>
       </div>
     </authContext.Provider>
   );

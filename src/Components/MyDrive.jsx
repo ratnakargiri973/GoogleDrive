@@ -12,40 +12,45 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { authContext } from './Context';
 
-
-
 function MyDrive() {
     const { files, setFiles, searchQuery } = useContext(authContext);
-   
     const [viewMode, setViewMode] = useState('list');
-    const notify1 = () => toast("File is successfully deleted");
-    const notify2 = () => toast("URL is copied to clipboard!!");
+
+    const notify1 = () => toast.success("✅ File is successfully deleted");
+    const notify2 = () => toast.success("📋 URL is copied to clipboard!");
+    const notifyError = (message) => toast.error(`❌ ${message}`);
 
     useEffect(() => {
         const user = auth.currentUser;
-        if (user) {
-            const filesCollection = collection(db, "myfiles");
-            const q = query(filesCollection, where("uid", "==", user.uid));
-            const unsubscribe = onSnapshot(q, (snapshot) => {
-                setFiles(snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    data: doc.data()
-                })));
-            }, (error) => {
-                console.error("Error fetching files:", error); 
-            });
+        if (!user) return;
 
-            return () => unsubscribe();
-        }
+        const filesCollection = collection(db, "myfiles");
+        const q = query(filesCollection, where("uid", "==", user.uid));
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            setFiles(snapshot.docs.map(doc => ({
+                id: doc.id,
+                data: doc.data()
+            })));
+        }, (error) => {
+            console.error("Error fetching files:", error);
+            notifyError("Failed to fetch files");
+        });
+
+        return () => unsubscribe();
     }, [setFiles]);
 
     const changeBytes = (bytes, decimals = 2) => {
-        if (bytes === 0) return '0 Bytes';
+        if (!bytes) return '0 Bytes';
         const k = 1024;
-        const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + sizes[i];
+    };
+
+    const formatDate = (timestamp) => {
+        if (!timestamp?.seconds) return "N/A";
+        return new Date(timestamp.seconds * 1000).toUTCString();
     };
 
     const handleDelete = async (fileId, fileURL) => {
@@ -53,6 +58,8 @@ function MyDrive() {
         if (!confirmDelete) return;
 
         try {
+            if (!fileURL) throw new Error("Invalid file URL");
+
             const fileRef = ref(storage, fileURL);
             await deleteObject(fileRef);
 
@@ -60,109 +67,99 @@ function MyDrive() {
             notify1();
         } catch (error) {
             console.error("Error deleting file:", error);
-            alert("Error deleting file: " + error.message);
+            notifyError("Error deleting file: " + error.message);
         }
     };
 
     const handleCopy = async (fileURL) => {
         try {
+            if (!fileURL) throw new Error("Invalid file URL");
             await navigator.clipboard.writeText(fileURL);
             notify2();
         } catch (error) {
             console.error('Error copying URL:', error);
-            alert('Failed to copy URL: ' + error.message);
+            notifyError('Failed to copy URL');
         }
     };
 
     const filteredFiles = files.filter(file =>
-        file.data.filename.toLowerCase().includes(searchQuery.toLowerCase())
+        file.data?.filename?.toLowerCase().includes(searchQuery?.toLowerCase() || "")
     );
 
     return (
         <>
             <div className="flex-1 p-6 lg:p-10">
-            <header className="flex flex-col lg:flex-row justify-between items-center mb-6">
-                <h1 className="font-bold text-3xl text-gray-900">My Drive</h1>
-                <div className="flex gap-4">
-                    <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}>
-                        <ViewListIcon />
-                    </button>
-                    <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition ${viewMode === 'grid' ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}>
-                        <GridViewIcon />
-                    </button>
-                </div>
-            </header>
-            
-            {filteredFiles.length > 0 ? (
-                viewMode === 'list' ? (
-                    <div className="bg-white shadow-md rounded-lg p-4">
-                        <div className="grid grid-cols-4 font-semibold text-gray-700 border-b pb-2">
-                            <p>Name</p>
-                            <p>Last Modified</p>
-                            <p>File Size</p>
-                            <p>Actions</p>
+                <header className="flex flex-col lg:flex-row justify-between items-center mb-6">
+                    <h1 className="font-bold text-3xl text-gray-900">My Drive</h1>
+                    <div className="flex gap-4">
+                        <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list' ? 'bg-blue-500 text-white shadow-md' : 'bg-gray-200 hover:bg-gray-300'}`}>
+                            <ViewListIcon />
+                        </button>
+                        <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'grid' ? 'bg-blue-500 text-white shadow-md' : 'bg-gray-200 hover:bg-gray-300'}`}>
+                            <GridViewIcon />
+                        </button>
+                    </div>
+                </header>
+
+                {filteredFiles.length > 0 ? (
+                    viewMode === 'list' ? (
+                        <div className="bg-white shadow-lg rounded-lg p-4">
+                            <div className="grid grid-cols-4 font-semibold text-gray-700 border-b pb-2">
+                                <p>Name</p>
+                                <p>Last Modified</p>
+                                <p>File Size</p>
+                                <p>Actions</p>
+                            </div>
+                            {filteredFiles.map(file => (
+                                <div key={file.id} className="grid grid-cols-4 items-center p-3 mt-2 rounded-lg bg-blue-50 hover:bg-blue-100 transition">
+                                    <a href={file.data?.fileURL || "#"} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline">
+                                        <InsertDriveFileIcon /> {file.data?.filename || "Unknown File"}
+                                    </a>
+                                    <p>{formatDate(file.data?.timestamp)}</p>
+                                    <p>{changeBytes(file.data?.size)}</p>
+                                    <div className="flex gap-2">
+                                        <button onClick={() => handleCopy(file.data?.fileURL)} className="text-gray-600 hover:text-gray-900 transition-all">
+                                            <ContentCopyIcon />
+                                        </button>
+                                        <button onClick={() => handleDelete(file.id, file.data?.fileURL)} className="text-red-500 hover:text-red-700 transition-all">
+                                            <DeleteIcon />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                        {filteredFiles.map(file => (
-                            <div key={file.id} className="grid grid-cols-4 items-center p-3 mt-2 rounded-lg bg-green-100 hover:bg-green-200 transition">
-                                <a href={file.data.fileURL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline">
-                                    <InsertDriveFileIcon /> {file.data.filename}
-                                </a>
-                                <p>{new Date(file.data.timestamp?.seconds * 1000).toUTCString()}</p>
-                                <p>{changeBytes(file.data.size)}</p>
-                                <div className="flex gap-2">
-                                    <button onClick={() => handleCopy(file.data.fileURL)} className="text-gray-600 hover:text-gray-900">
-                                        <ContentCopyIcon />
-                                    </button>
-                                    <button onClick={() => handleDelete(file.id, file.data.fileURL)} className="text-red-500 hover:text-red-700">
-                                        <DeleteIcon />
-                                    </button>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {filteredFiles.map(file => (
+                                <div key={file.id} className="bg-blue-50 p-4 rounded-lg shadow-md hover:bg-blue-100 transition-all duration-300">
+                                    <a href={file.data?.fileURL || "#"} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
+                                        <InsertDriveFileIcon style={{ fontSize: 48 }} className="text-gray-700" />
+                                        <p className="mt-2 text-center text-gray-900 font-medium">{file.data?.filename || "Unknown File"}</p>
+                                        <p className="text-sm text-gray-700">{formatDate(file.data?.timestamp)}</p>
+                                        <p className="text-sm text-gray-700">{changeBytes(file.data?.size)}</p>
+                                    </a>
+                                    <div className="mt-2 flex justify-center gap-2">
+                                        <button onClick={() => handleCopy(file.data?.fileURL)} className="text-gray-600 hover:text-gray-900 transition-all">
+                                            <ContentCopyIcon />
+                                        </button>
+                                        <button onClick={() => handleDelete(file.id, file.data?.fileURL)} className="text-red-500 hover:text-red-700 transition-all">
+                                            <DeleteIcon />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {filteredFiles.map(file => (
-                            <div key={file.id} className="bg-green-100 p-4 rounded-lg shadow-md hover:bg-green-200 transition">
-                                <a href={file.data.fileURL} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
-                                    <InsertDriveFileIcon style={{ fontSize: 48 }} className="text-gray-700" />
-                                    <p className="mt-2 text-center text-gray-900 font-medium">{file.data.filename}</p>
-                                    <p className="text-sm text-gray-700">{new Date(file.data.timestamp?.seconds * 1000).toUTCString()}</p>
-                                    <p className="text-sm text-gray-700">{changeBytes(file.data.size)}</p>
-                                </a>
-                                <div className="mt-2 flex justify-center gap-2">
-                                    <button onClick={() => handleCopy(file.data.fileURL)} className="text-gray-600 hover:text-gray-900">
-                                        <ContentCopyIcon />
-                                    </button>
-                                    <button onClick={() => handleDelete(file.id, file.data.fileURL)} className="text-red-500 hover:text-red-700">
-                                        <DeleteIcon />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="flex flex-col justify-center items-center gap-4 w-full h-full text-center">
+                        <img src={home} alt="home" className="w-80 opacity-90" />
+                        <h1 className="text-gray-900 text-2xl font-bold">Welcome to Drive, your cloud storage</h1>
+                        <p className="text-gray-700">Click "New" to upload files</p>
                     </div>
-                )
-            ) : (
-                <div className="flex flex-col justify-center items-center gap-4 w-full h-full text-center">
-                    <img src={home} alt="home" className="w-80" />
-                    <h1 className="text-gray-900 text-2xl font-bold">Welcome to Drive, the my drive for all your files</h1>
-                    <p className="text-gray-700">Use the “New” button to upload</p>
-                </div>
-            )}
-            
-            <ToastContainer
-                position="top-right"
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
-            />
-        </div>
+                )}
+
+                <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} pauseOnHover draggable theme="light" />
+            </div>
         </>
     );
 }

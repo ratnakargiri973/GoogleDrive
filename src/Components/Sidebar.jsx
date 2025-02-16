@@ -1,5 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import DriveFolderUploadIcon from '@mui/icons-material/DriveFolderUpload';
@@ -14,7 +14,6 @@ import { Modal } from '@mui/material';
 import { db, storage, serverTimestamp, auth } from "../firebase";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
-import { Link } from 'react-router-dom';
 
 function Sidebar() {
     const [open, setOpen] = useState(false);
@@ -23,6 +22,7 @@ function Sidebar() {
     const [usedStorage, setUsedStorage] = useState(0);
     const totalStorage = 100 * 1024 * 1024;
 
+    const location = useLocation();
     const user = auth.currentUser;
 
     useEffect(() => {
@@ -55,7 +55,6 @@ function Sidebar() {
         try {
             const fileRef = ref(storage, `files/${file.name}`);
             const snapshot = await uploadBytes(fileRef, file);
-
             const url = await getDownloadURL(fileRef);
 
             await addDoc(collection(db, "myfiles"), {
@@ -63,7 +62,8 @@ function Sidebar() {
                 filename: file.name,
                 fileURL: url,
                 size: snapshot.metadata.size,
-                uid: user.uid 
+                uid: user.uid,
+                owner: user.email
             });
 
             setUsedStorage(prevUsedStorage => prevUsedStorage + snapshot.metadata.size);
@@ -82,46 +82,67 @@ function Sidebar() {
 
     return (
         <>
-            <Modal open={open} onClose={() => setOpen(false)}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div className='m-auto w-80 sm:w-96 h-36 rounded bg-teal-500 p-4'>
-                    <form onSubmit={handleUpload} className='flex justify-center items-center flex-col w-full h-full gap-4 text-white'>
-                        <h3 className='font-bold text-lg'>Select the file you want to upload</h3>
+            <Modal open={open} onClose={() => setOpen(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className='m-auto w-80 sm:w-96 h-40 rounded-lg bg-teal-600 p-5 shadow-lg'>
+                    <form onSubmit={handleUpload} className='flex flex-col items-center gap-4 text-white'>
+                        <h3 className='font-bold text-lg'>Select the file to upload</h3>
                         <div>
-                            {uploading ? <h3>Uploading...</h3> :
-                                (<div className='flex justify-center items-center flex-col w-full h-full gap-4'>
-                                    <input type="file" className='modal_file' onChange={handleFile} />
-                                    <input type="submit" value="Upload" className='modal_submit bg-red-500 py-2 px-4 rounded' />
-                                </div>)
-                            }
+                            {uploading ? (
+                                <h3 className="text-center text-lg font-semibold">Uploading...</h3>
+                            ) : (
+                                <div className='flex flex-col gap-3'>
+                                    <input type="file" className='text-sm' onChange={handleFile} />
+                                    <button type="submit" className='bg-red-500 px-4 py-2 rounded-lg shadow-md hover:bg-red-600 transition'>
+                                        Upload
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </form>
                 </div>
             </Modal>
 
-            <div className='sidebarContainer flex flex-col justify-between p-4 sm:p-8 w-full sm:w-1/4 lg:w-1/5 gap-4 h-full mt-3.5'>
-                <button className='flex justify-center items-center gap-5 shadow-md p-2 rounded shadow-black w-full border-0 outline-0 cursor-pointer' onClick={() => setOpen(true)}>
+            <div className='flex flex-col justify-between p-6 w-full sm:w-1/4 lg:w-1/5 h-full bg-white shadow-lg rounded-r-2xl'>
+                <button
+                    className='flex items-center gap-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white p-3 rounded-lg shadow-md hover:shadow-lg transition w-full'
+                    onClick={() => setOpen(true)}
+                >
                     <AddIcon />
-                    <span className='hidden sm:block'>New</span>
+                    <span className='hidden sm:block font-semibold'>New</span>
                 </button>
-                <div className='flex flex-col gap-4'>
-                    <ul className='flex flex-col gap-2'>
-                        <Link className='flex justify-center items-center gap-2 hover:bg-gray-200 cursor-pointer p-2 rounded' to='/'><HomeOutlinedIcon /> Home</Link>
-                        <Link className='flex justify-center items-center gap-2 hover:bg-gray-200 cursor-pointer p-2 rounded' to='/my-drive'><DriveFolderUploadIcon />My Drive</Link>
-                        <Link className='flex justify-center items-center gap-2 hover:bg-gray-200 cursor-pointer p-2 rounded' to='/computers'><ComputerIcon />Computers</Link>
-                        <Link className='flex justify-center items-center gap-2 hover:bg-gray-200 cursor-pointer p-2 rounded' to='/share-me'><ShareIcon />Shared with me</Link>
-                        <Link className='flex justify-center items-center gap-2 hover:bg-gray-200 cursor-pointer p-2 rounded' to='/recent'><ScheduleIcon />Recent</Link>
-                        <Link className='flex justify-center items-center gap-2 hover:bg-gray-200 cursor-pointer p-2 rounded' to='/starred'><StarBorderIcon />Starred</Link>
-                        <Link className='flex justify-center items-center gap-2 hover:bg-gray-200 cursor-pointer p-2 rounded' to='/spam'><ErrorOutlineIcon />Spam</Link>
-                        <Link className='flex justify-center items-center gap-2 hover:bg-gray-200 cursor-pointer p-2 rounded' to='/trash'><DeleteIcon />Trash</Link>
-                        <Link className='flex justify-center items-center gap-2 hover:bg-gray-200 cursor-pointer p-2 rounded' to='/storage'><CloudOutlinedIcon />Storage</Link>
-                    </ul>
-                </div>
-                <div className='flex flex-col gap-2'>
-                    <div className='h-2 rounded-3xl bg-gray-300 w-full'>
-                        <div className='bg-blue-600 h-full rounded-3xl' style={{ width: `${usedPercentage}%` }}></div>
+
+                <ul className='mt-6 flex flex-col gap-2'>
+                    {[
+                        { to: '/', icon: <HomeOutlinedIcon />, label: 'Home' },
+                        { to: '/my-drive', icon: <DriveFolderUploadIcon />, label: 'My Drive' },
+                        { to: '/computers', icon: <ComputerIcon />, label: 'Computers' },
+                        { to: '/share-me', icon: <ShareIcon />, label: 'Shared with me' },
+                        { to: '/recent', icon: <ScheduleIcon />, label: 'Recent' },
+                        { to: '/starred', icon: <StarBorderIcon />, label: 'Starred' },
+                        { to: '/spam', icon: <ErrorOutlineIcon />, label: 'Spam' },
+                        { to: '/trash', icon: <DeleteIcon />, label: 'Trash' },
+                        { to: '/storage', icon: <CloudOutlinedIcon />, label: 'Storage' }
+                    ].map(({ to, icon, label }) => (
+                        <Link
+                            key={to}
+                            to={to}
+                            className={`flex items-center gap-3 p-3 rounded-lg transition text-gray-700 hover:bg-blue-100 hover:text-blue-800 ${
+                                location.pathname === to ? 'bg-blue-500 text-white' : ''
+                            }`}
+                        >
+                            {icon} {label}
+                        </Link>
+                    ))}
+                </ul>
+
+               
+                <div className='mt-6'>
+                    <div className='h-2 rounded-3xl bg-gray-300 w-full overflow-hidden'>
+                        <div className='bg-gradient-to-r from-green-400 to-green-600 h-full rounded-3xl' style={{ width: `${usedPercentage}%` }}></div>
                     </div>
-                    <span className='text-sm'>{(usedStorage / 1024 / 1024).toFixed(2)} MB of 100 MB</span>
+                    <span className='text-sm font-semibold text-gray-600 block mt-2'>
+                        {(usedStorage / 1024 / 1024).toFixed(2)} MB of 100 MB used
+                    </span>
                 </div>
             </div>
         </>
