@@ -90,7 +90,7 @@ function MyDrive() {
         <>
             <div className="flex-1 p-6 lg:p-10">
                 <header className="flex flex-col lg:flex-row justify-between items-center mb-6">
-                    <h1 className="font-bold text-3xl text-gray-900">My Drive</h1>
+                    <h1 className="font-bold text-3xl">My Drive</h1>
                     <div className="flex gap-4">
                         <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all duration-300 ${viewMode === 'list' ? 'bg-blue-500 text-white shadow-md' : 'bg-gray-200 hover:bg-gray-300'}`}>
                             <ViewListIcon />
@@ -115,8 +115,8 @@ function MyDrive() {
                                     <a href={file.data?.fileURL || "#"} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline">
                                         <InsertDriveFileIcon /> {file.data?.filename || "Unknown File"}
                                     </a>
-                                    <p>{formatDate(file.data?.timestamp)}</p>
-                                    <p>{changeBytes(file.data?.size)}</p>
+                                    <p className='text-gray-900'>{formatDate(file.data?.timestamp)}</p>
+                                    <p className='text-gray-900'>{changeBytes(file.data?.size)}</p>
                                     <div className="flex gap-2">
                                         <button onClick={() => handleCopy(file.data?.fileURL)} className="text-gray-600 hover:text-gray-900 transition-all">
                                             <ContentCopyIcon />

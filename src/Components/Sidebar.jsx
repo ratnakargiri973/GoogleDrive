@@ -102,7 +102,7 @@ function Sidebar() {
                 </div>
             </Modal>
 
-            <div className='flex flex-col justify-between p-6 w-full sm:w-1/4 lg:w-1/5 h-full bg-white shadow-lg rounded-r-2xl'>
+            <div className='flex flex-col justify-between p-6 w-full sm:w-1/4 lg:w-1/5 h-full  shadow-lg '>
                 <button
                     className='flex items-center gap-3 bg-gradient-to-r from-blue-500 to-blue-700 text-white p-3 rounded-lg shadow-md hover:shadow-lg transition w-full'
                     onClick={() => setOpen(true)}
@@ -126,7 +126,7 @@ function Sidebar() {
                         <Link
                             key={to}
                             to={to}
-                            className={`flex items-center gap-3 p-3 rounded-lg transition text-gray-700 hover:bg-blue-100 hover:text-blue-800 ${
+                            className={`flex items-center gap-3 p-3 rounded-lg transition  hover:bg-blue-100 hover:text-blue-800 ${
                                 location.pathname === to ? 'bg-blue-500 text-white' : ''
                             }`}
                         >

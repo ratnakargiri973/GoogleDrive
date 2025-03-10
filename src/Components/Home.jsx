@@ -77,9 +77,9 @@ function Home() {
     );
 
     return (
-        <div className="flex-1 p-6 lg:p-10 bg-gradient-to-r from-gray-100 to-gray-200 min-h-screen">
+        <div className="flex-1 p-6 lg:p-10  min-h-screen">
             <header className="flex flex-col lg:flex-row justify-between items-center mb-6">
-            <h1 className="font-extrabold text-4xl text-gray-900 flex items-center gap-2">
+            <h1 className="font-extrabold text-4xl  flex items-center gap-2">
                  <HomeIcon className="text-blue-500 text-7xl" /> Home
            </h1>
                 <div className="flex gap-4">
@@ -106,8 +106,8 @@ function Home() {
                                 <a href={file.data?.fileURL || "#"} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-700 font-semibold hover:underline">
                                     <InsertDriveFileIcon /> {file.data?.filename || "Unknown File"}
                                 </a>
-                                <p>{formatDate(file.data?.timestamp)}</p>
-                                <p>{formatBytes(file.data?.size)}</p>
+                                <p className='text-gray-900'>{formatDate(file.data?.timestamp)}</p>
+                                <p className='text-gray-900'>{formatBytes(file.data?.size)}</p>
                                 <div className="flex gap-3">
                                     <button onClick={() => handleCopy(file.data?.fileURL)} className="text-gray-600 hover:text-gray-900">
                                         <ContentCopyIcon />
